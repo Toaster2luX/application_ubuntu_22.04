@@ -1,0 +1,194 @@
+---
+- hosts: local
+  become: yes
+
+  tasks:
+ 
+## Mise à jour du système
+  - name: Update/upgrade des paquets
+    apt:
+      upgrade: yes
+      update_cache: yes
+      cache_valid_time: 86400 
+      autoclean: true
+    tags: update
+ 
+## Installation avec apt
+  - name: Installation des paquets
+    apt:
+      update_cache: yes
+      name: "{{ packages }}"
+    vars:
+      packages:
+      - vim 
+      - terminator
+      - default-jre 
+      - keepass2
+      - apt-transport-https 
+      - gnupg  
+      - curl
+      - wget
+      - git
+      - tree
+      - mlocate
+      - zip
+      - 7zip
+      - docker
+      - docker.io  
+      - gedit
+      - kazam  
+      - shutter
+      - bash-completion
+      - gparted
+      - net-tools
+      - filezilla
+      - vlc
+      - whois
+      - openvpn
+      - network-manager-openvpn-gnome
+      - liferea ## lecteur rss
+      - keepassxc
+      - redshift
+      - redshift-gtk
+      - pwgen
+      - cifs-utils
+      - ncdu
+      - fwupd
+      - ifupdown
+      - smartmontools
+      - vagrant
+      - virtualbox
+      - youtube-dl
+      - ufw
+    tags: apt
+ 
+## Custom configuration pour terminator
+  - name: Vérification si le répertoire terminator existe
+    become: no
+    stat:
+      path: ~/.config/terminator/
+    register: rep_terminator
+    tags: terminator
+ 
+  - name: Si le répertoire existe
+    become: no
+    debug:
+      msg: "le répertoire existe"
+    when: rep_terminator.stat.exists
+    tags: terminator
+
+  - name: Création si le répertoire n'éxiste pas
+    become: no
+    file:
+      path: ~/.config/terminator/
+      state: directory
+      mode: 0700
+    when: rep_terminator.stat.exists == false
+    tags: terminator
+
+  - name: Copie fichier de conf terminator
+    become: no
+    copy:
+      src: "../files/custom_config_terminator"
+      dest: "~/.config/terminator/config"
+      mode: '0664'
+    tags: terminator  
+
+## Installation du navigateur Brave
+  - name: Récupération de la clé pgp
+    shell: curl -fsSLo /usr/share/keyrings/brave-browser-archive-keyring.gpg https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
+    tags: brave
+
+  - name: Ajout du repo apt pour brave
+    apt_repository:
+      repo: "deb [signed-by=/usr/share/keyrings/brave-browser-archive-keyring.gpg arch=amd64] https://brave-browser-apt-release.s3.brave.com/ stable main"
+      state: present
+      filename: brave-browser-release
+      update_cache: true
+    tags: brave
+
+  - name: Installer brave
+    apt:
+      name: brave-browser
+      state: present
+    tags: brave
+
+## Installation de Visual studio code
+  - name: Vérification si le répertoire existe
+    stat:
+      path: '/etc/apt/keyrings'
+    register: rep_vscode
+    tags: vscode
+      
+  - name: Si le répertoire existe
+    debug:
+      msg: "le répertoire existe"
+    when: rep_vscode.stat.exists
+    tags: vscode
+
+  - name: Création si le répertoire n'existe pas
+    file:
+      path: '/etc/apt/keyrings'
+      state: directory
+      mode: 'u=rwx,go=rx'
+    when: rep_vscode.stat.exists == false
+    tags: vscode
+
+  - name: Récupération de la clé pgp
+    get_url:
+      url: 'https://packages.microsoft.com/keys/microsoft.asc'
+      dest: '/etc/apt/keyrings/'
+      mode: 'u=rw,go=r'
+      force: yes
+    tags: vscode
+
+  - name: Ajout du repo apt pour vs code
+    apt_repository:
+      repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/microsoft.asc] https://packages.microsoft.com/repos/code stable main"
+      filename: vscode
+      state: present
+    tags: vscode
+
+  - name: Install code
+    apt:
+      name: code
+      state: present
+    tags: vscode
+
+## Installation de chrome (me sert pour les tests de certificat)
+  - name: Ajout de la clé pour chrome
+    apt_key:
+      url: "https://dl.google.com/linux/linux_signing_key.pub"
+      state: present
+    tags: chrome
+
+  - name: Ajout du repo apt pour chrome
+    apt_repository:
+      repo: deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main
+      state: present
+      filename: google-chrome
+    tags: chrome
+
+  - name: Install de google chrome
+    apt:
+      name: "google-chrome-stable"
+      state: latest
+      update_cache: true
+    tags: chrome
+
+## Installation depuis un .deb
+  - name: Installation Keystore-explorer
+    apt:
+      deb: https://github.com/kaikramer/keystore-explorer/releases/download/v5.5.1/kse_5.5.1_all.deb
+    tags: deb
+
+  - name: Installation xnview
+    apt:
+      deb: https://download.xnview.com/XnViewMP-linux-x64.deb
+    tags: deb
+
+
+
+
+
+
