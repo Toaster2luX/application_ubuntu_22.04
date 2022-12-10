@@ -7,5 +7,11 @@ Pour installer rapidement l'ensemble des applications
 -----------------
 $ ansible-playbook -i inventories playbooks/playbook.yml
 
-Avec un tag
+
+## Exécution avec un tag
+-----------------
 $ ansible-playbook -i inventories playbooks/playbook.yml --tags "deb"
+
+
+### Source
+https://it.izero.fr/ansible-installation-en-one-shot-dapplication-sous-xubuntu-22-04/
