@@ -1,4 +1,4 @@
-# Installation en one-shot d'application sous (X)ubuntu 22.04
+# [Ansible] Installation en one-shot d'application sous (X)ubuntu 22.04
 
 
 Pour installer rapidement l'ensemble des applications
